@@ -13,7 +13,7 @@ It is based off of the [Android Architecture Compnents](https://github.com/googl
 
 The intent of this fork, is to provide Realm users with knowlege of how to use Realm within the recommened architecture of Google and Architecture Components.  The examples are nearly identical with only the source of the data coming from Realm instead of SQLite.
 
-### Basic Sample
+### [Basic Sample](https://github.com/ericmaxwell2003/android-architecture-components/tree/master/BasicSample)
 
 - Shows how to persist data using a Realm database, uses ViewModels,  LiveData, DAOs, Transformations .map, switchMap, and the Dao Pattern with Realm.
 
