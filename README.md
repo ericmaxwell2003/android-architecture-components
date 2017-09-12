@@ -1,23 +1,20 @@
-Android Architecture Components samples
+Android Architecture Components + Realm sample
 ===================================
 
-A collection of samples using the Architecture Components:
+A Sample using the Architecture Components w/ Realm:
 
-- Room
+- Realm
 - Lifecycle-aware components
 - ViewModels
 - LiveData
+- DAO pattern
 
-### Samples
+### Basic Sample
 
-**The Architecture Components and these samples are previews to gather developer feedback. 
-Samples may not be fully featured, documented or tested and could be modified or deleted in the future.**
+- Shows how to persist data using a Realm database, uses ViewModels,  LiveData, DAOs, Transformations .map, switchMap, and the Dao Pattern with Realm.
 
-**[BasicSample](https://github.com/googlesamples/android-architecture-components/blob/master/BasicSample)** - Shows how to persist data using a SQLite database and Room. Also uses ViewModels and LiveData.
+This is based off of the AndroidArchitectureComponents [BasicSample](https://github.com/googlesamples/android-architecture-components/blob/master/BasicSample). 
 
-**[PersistenceContentProviderSample](https://github.com/googlesamples/android-architecture-components/blob/master/PersistenceContentProviderSample)** - Shows how to expose data via a Content Provider using Room.
-
-**[GithubBrowserSample](https://github.com/googlesamples/android-architecture-components/blob/master/GithubBrowserSample)** - An **advanced**  sample that uses the Architecture components, Dagger and the Github API. Requires Android Studio 2.4.
 
 License
 -------
