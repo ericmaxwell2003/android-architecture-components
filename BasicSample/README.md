@@ -1,11 +1,13 @@
 Android Architecture Components Basic Sample
 ===================================
 
-This sample showcases the following Architecture Components:
+This sample showcases the following Architecture Components + Realm:
 
-* [Room](https://developer.android.com/topic/libraries/architecture/room.html)
 * [ViewModels](https://developer.android.com/reference/android/arch/lifecycle/ViewModel.html)
 * [LiveData](https://developer.android.com/reference/android/arch/lifecycle/LiveData.html)
+* [Realm](https://realm.io/docs/java/latest/)
+
+It is based off of the [Basic Sample](https://github.com/googlesamples/android-architecture-components/tree/master/BasicSample) in the Android Architecture Components project provided by Google.  This includes this README which is essentially the Google Readme with the relevant Room/SQLite parts swapped for Realm.
 
 ## Features
 
@@ -14,7 +16,7 @@ This sample contains two screens: a list of products and a detail view, that sho
 ### Presentation layer
 
 The presentation layer consists of the following components:
- * A main activity that handles navigation.
+* A main activity that handles navigation.
 * A fragment to display the list of products.
 * A fragment to display a product review.
 
@@ -29,37 +31,36 @@ The app uses a Model-View-ViewModel (MVVM) architecture for the presentation lay
 
 * ViewModel objects expose data using `LiveData` objects. `LiveData` allows you to observe changes to data across multiple components of your app without creating explicit and rigid dependency paths between them.
 
-* Views, including the fragments used in this sample, subscribe to corresponding `LiveData` objects. Because `LiveData` is lifecycle-aware, it doesn’t push changes to the underlying data if the observer is not in an active state, and this helps to avoid many common bugs. This is an example of a subscription:
+* Views, including the fragments used in this sample, subscribe to corresponding `LiveData` objects. Because `LiveData` is lifecycle-aware, it doesn't push changes to the underlying data if the observer is not in an active state, and this helps to avoid many common bugs. This is an example of a subscription:
 
 ```java
         // Update the list of products when the underlying data changes.
-        viewModel.getProducts().observe(this, new Observer<List<ProductEntity>>() {
-            @Override
-            public void onChanged(@Nullable List<ProductEntity> myProducts) {
-                if (myProducts != null) {
-                    mBinding.setIsLoading(false);
-                    mProductAdapter.setProductList(myProducts);
-                } else {
-                    mBinding.setIsLoading(true);
-                }
+        // Update the list when the data changes
+        viewModel.getProducts().observe(this, myProducts -> {
+            if (myProducts != null) {
+                mBinding.setIsLoading(false);
+                mProductAdapter.setProductList(myProducts);
+            } else {
+                mBinding.setIsLoading(true);
             }
         });
 ```
 
 ### Data layer
 
-The database is created using Room and it has two entities: a `ProductEntity` and a `CommentEntity` that generate corresponding SQLite tables at runtime.
+The database is created using Realm and it has two entities: a `ProductEntity` and a `CommentEntity`, these implement interfaces so that the views work with a non realm specific abstraction.  This improves testability.
 
-Room populates the database asynchronously on first use. The `DatabaseCreator` class is responsible for creating the database and tables, and populating them with sample product and review data. This is done on the first use of the database, with the help of an `AsyncTask`. To simulate low-performance, an artificial delay is added. To let other components know when the data has finished populating, the `DatabaseCreator` exposes a `LiveData` object..
+Realm populates the database asynchronously on first use. The `DatabaseCreator` class is responsible for creating the database and tables, and populating them with sample product and review data. This is done on the first use of the database, with the help of an `AsyncTask`. To simulate low-performance, an artificial delay is added. To let other components know when the data has finished populating, the `DatabaseCreator` exposes a `LiveData` object..
 
-To access the data and execute queries, you use a [Data Access Object](https://developer.android.com/topic/libraries/architecture/room.html#daos) (DAO). For example, a product is loaded with the following query:
+To access the data and execute queries, you use a Data Access Object (DAO). For example, a product is loaded with the following query:
 
 ```
-    @Query("select * from products where id = :productId")
-    LiveData<ProductEntity> loadProduct(int productId);
+        LiveData<ProductEntity> loadProduct(String productId) {
+            return new RealmModelLiveData<>(byId(productId).findFirstAsync());
+        }
 ```
 
-Queries that return a `LiveData` object can be observed, so when  a change in one of the affected tables is detected, `LiveData` delivers a notification of that change to the registered observers.
+Queries that return a `LiveData` object can be observed, so when a change in one of the affected tables is detected, `LiveData` delivers a notification of that change to the registered observers.
 
 ### Transformations
 
@@ -69,16 +70,17 @@ For the purpose of the sample, the database is deleted and re-populated each tim
 
 ```java
         mObservableProducts = Transformations.switchMap(databaseCreated,
-                new Function<Boolean, LiveData<List<ProductEntity>>>() {
-            @Override
-            public LiveData<List<ProductEntity>> apply(Boolean isDbCreated) {
-                if (!isDbCreated) {
+            isDbCreated -> {
+                // Not needed here, but watch out for null
+                if (!Boolean.TRUE.equals(isDbCreated)) {
+                    //noinspection unchecked
                     return ABSENT;
                 } else {
-                    return databaseCreator.getDatabase().productDao().loadAllProducts();
+                    return Transformations.map(
+                            productDao(database).loadAllProducts(), ArrayList::new);
                 }
-            }
-        });
+            });
+
 ```
 
 Whenever `databaseCreated` changes, `mObservableProducts` will get a new value, either an `ABSENT` `LiveData` or the list of products. The database will be observed with the same scope as `mObservableProducts`.

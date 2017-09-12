@@ -57,13 +57,7 @@ public class ProductFragment extends LifecycleFragment {
         return mBinding.getRoot();
     }
 
-    private final CommentClickCallback mCommentClickCallback = new CommentClickCallback() {
-        @Override
-        public void onClick(Comment comment) {
-            // no-op
-
-        }
-    };
+    private final CommentClickCallback mCommentClickCallback = comment -> { /* no-op */ };
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -82,23 +76,15 @@ public class ProductFragment extends LifecycleFragment {
     private void subscribeToModel(final ProductViewModel model) {
 
         // Observe product data
-        model.getObservableProduct().observe(this, new Observer<ProductEntity>() {
-            @Override
-            public void onChanged(@Nullable ProductEntity productEntity) {
-                model.setProduct(productEntity);
-            }
-        });
+        model.getObservableProduct().observe(this, model::setProduct);
 
         // Observe comments
-        model.getComments().observe(this, new Observer<List<CommentEntity>>() {
-            @Override
-            public void onChanged(@Nullable List<CommentEntity> commentEntities) {
-                if (commentEntities != null) {
-                    mBinding.setIsLoading(false);
-                    mCommentAdapter.setCommentList(commentEntities);
-                } else {
-                    mBinding.setIsLoading(true);
-                }
+        model.getComments().observe(this, commentEntities -> {
+            if (commentEntities != null) {
+                mBinding.setIsLoading(false);
+                mCommentAdapter.setCommentList(commentEntities);
+            } else {
+                mBinding.setIsLoading(true);
             }
         });
     }
