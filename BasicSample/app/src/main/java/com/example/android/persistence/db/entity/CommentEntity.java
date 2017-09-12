@@ -16,44 +16,46 @@
 
 package com.example.android.persistence.db.entity;
 
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.ForeignKey;
-import android.arch.persistence.room.Index;
-import android.arch.persistence.room.PrimaryKey;
 import com.example.android.persistence.model.Comment;
+import com.example.android.persistence.model.Product;
 
 import java.util.Date;
 
-@Entity(tableName = "comments", foreignKeys = {
-        @ForeignKey(entity = ProductEntity.class,
-                parentColumns = "id",
-                childColumns = "productId",
-                onDelete = ForeignKey.CASCADE)}, indices = {
-        @Index(value = "productId")
-})
-public class CommentEntity implements Comment {
-    @PrimaryKey(autoGenerate = true)
-    private int id;
-    private int productId;
+import io.realm.RealmModel;
+import io.realm.annotations.PrimaryKey;
+import io.realm.annotations.RealmClass;
+import io.realm.annotations.Required;
+
+@RealmClass
+public class CommentEntity implements RealmModel, Comment {
+
+    @Required
+    @PrimaryKey
+    private String id;
+    private ProductEntity product;
     private String text;
     private Date postedAt;
 
     @Override
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
     @Override
-    public int getProductId() {
-        return productId;
+    public String getProductId() {
+        return product.getId();
     }
 
-    public void setProductId(int productId) {
-        this.productId = productId;
+    public ProductEntity getProduct() {
+        return product;
+    }
+
+    public void setProduct(ProductEntity product) {
+        this.product = product;
     }
 
     @Override
@@ -79,8 +81,9 @@ public class CommentEntity implements Comment {
 
     public CommentEntity(Comment comment) {
         id = comment.getId();
-        productId = comment.getProductId();
+        //product = comment.getProductId();
         text = comment.getText();
         postedAt = comment.getPostedAt();
+        throw new UnsupportedOperationException("Need to fix this getter/setter for product");
     }
 }

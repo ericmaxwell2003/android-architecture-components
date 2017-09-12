@@ -23,9 +23,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import com.example.android.persistence.R;
 import com.example.android.persistence.databinding.CommentItemBinding;
 import com.example.android.persistence.model.Comment;
-import com.example.android.persistence.R;
 
 import java.util.List;
 import java.util.Objects;
@@ -61,16 +61,16 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
                 public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
                     Comment old = mCommentList.get(oldItemPosition);
                     Comment comment = comments.get(newItemPosition);
-                    return old.getId() == comment.getId();
+                    return old.getId().equals(comment.getId());
                 }
 
                 @Override
                 public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
                     Comment old = mCommentList.get(oldItemPosition);
                     Comment comment = comments.get(newItemPosition);
-                    return old.getId() == comment.getId()
+                    return old.getId().equals(comment.getId())
                             && old.getPostedAt() == comment.getPostedAt()
-                            && old.getProductId() == comment.getProductId()
+                            && old.getProductId().equals(comment.getProductId())
                             && Objects.equals(old.getText(), comment.getText());
                 }
             });

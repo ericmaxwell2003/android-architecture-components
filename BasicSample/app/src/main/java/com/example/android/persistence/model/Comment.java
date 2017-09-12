@@ -19,8 +19,8 @@ package com.example.android.persistence.model;
 import java.util.Date;
 
 public interface Comment {
-    int getId();
-    int getProductId();
+    String getId();
+    String getProductId();
     String getText();
     Date getPostedAt();
 }

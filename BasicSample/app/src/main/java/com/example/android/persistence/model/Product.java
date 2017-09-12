@@ -17,7 +17,7 @@
 package com.example.android.persistence.model;
 
 public interface Product {
-    int getId();
+    String getId();
     String getName();
     String getDescription();
     int getPrice();

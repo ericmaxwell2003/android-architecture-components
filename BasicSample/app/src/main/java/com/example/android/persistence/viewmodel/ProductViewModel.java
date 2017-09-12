@@ -16,27 +16,32 @@
 
 package com.example.android.persistence.viewmodel;
 
-import android.app.Application;
-import android.arch.core.util.Function;
-import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Transformations;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.databinding.ObservableField;
-import android.support.annotation.NonNull;
 
 import com.example.android.persistence.db.DatabaseCreator;
 import com.example.android.persistence.db.entity.CommentEntity;
 import com.example.android.persistence.db.entity.ProductEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class ProductViewModel extends AndroidViewModel {
+import io.realm.Realm;
+
+import static com.example.android.persistence.db.util.RealmUtil.commentDao;
+import static com.example.android.persistence.db.util.RealmUtil.productDao;
+
+public class ProductViewModel extends ViewModel {
+
+    private Realm database;
 
     private static final MutableLiveData ABSENT = new MutableLiveData();
-    {
+
+    static {
         //noinspection unchecked
         ABSENT.setValue(null);
     }
@@ -45,44 +50,43 @@ public class ProductViewModel extends AndroidViewModel {
 
     public ObservableField<ProductEntity> product = new ObservableField<>();
 
-    private final int mProductId;
+    private final String mProductId;
 
     private final LiveData<List<CommentEntity>> mObservableComments;
 
-    public ProductViewModel(@NonNull Application application,
-                            final int productId) {
-        super(application);
+    public ProductViewModel(final String productId) {
+
+        database = Realm.getDefaultInstance();
+
         mProductId = productId;
 
-        final DatabaseCreator databaseCreator = DatabaseCreator.getInstance(this.getApplication());
+        final DatabaseCreator databaseCreator = DatabaseCreator.getInstance();
 
-        mObservableComments = Transformations.switchMap(databaseCreator.isDatabaseCreated(), new Function<Boolean, LiveData<List<CommentEntity>>>() {
-            @Override
-            public LiveData<List<CommentEntity>> apply(Boolean isDbCreated) {
-                if (!isDbCreated) {
-                    //noinspection unchecked
-                    return ABSENT;
-                } else {
-                    //noinspection ConstantConditions
-                    return databaseCreator.getDatabase().commentDao().loadComments(mProductId);
-                }
-            }
+        mObservableComments = Transformations.switchMap(databaseCreator.isDatabaseCreated(),
+                isDbCreated -> {
+                    if (!isDbCreated) {
+                        //noinspection unchecked
+                        return ABSENT;
+
+                    } else {
+                        //noinspection ConstantConditions
+                        return Transformations.map(
+                                commentDao(database).loadComments(mProductId), ArrayList::new);
+                    }
         });
 
-        mObservableProduct = Transformations.switchMap(databaseCreator.isDatabaseCreated(), new Function<Boolean, LiveData<ProductEntity>>() {
-            @Override
-            public LiveData<ProductEntity> apply(Boolean isDbCreated) {
-                if (!isDbCreated) {
-                    //noinspection unchecked
-                    return ABSENT;
-                } else {
-                    //noinspection ConstantConditions
-                    return databaseCreator.getDatabase().productDao().loadProduct(mProductId);
-                }
-            }
+        mObservableProduct = Transformations.switchMap(databaseCreator.isDatabaseCreated(),
+                isDbCreated -> {
+                    if (!isDbCreated) {
+                        //noinspection unchecked
+                        return ABSENT;
+                    } else {
+                        //noinspection ConstantConditions
+                        return productDao(database).loadProduct(mProductId);
+                    }
         });
 
-        databaseCreator.createDb(this.getApplication());
+        databaseCreator.createDb();
 
     }
     /**
@@ -108,20 +112,16 @@ public class ProductViewModel extends AndroidViewModel {
      */
     public static class Factory extends ViewModelProvider.NewInstanceFactory {
 
-        @NonNull
-        private final Application mApplication;
+        private final String mProductId;
 
-        private final int mProductId;
-
-        public Factory(@NonNull Application application, int productId) {
-            mApplication = application;
+        public Factory(String productId) {
             mProductId = productId;
         }
 
         @Override
         public <T extends ViewModel> T create(Class<T> modelClass) {
             //noinspection unchecked
-            return (T) new ProductViewModel(mApplication, mProductId);
+            return (T) new ProductViewModel(mProductId);
         }
     }
 }

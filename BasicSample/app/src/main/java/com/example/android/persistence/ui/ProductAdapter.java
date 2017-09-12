@@ -23,16 +23,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import com.example.android.persistence.R;
 import com.example.android.persistence.databinding.ProductItemBinding;
 import com.example.android.persistence.model.Product;
-import com.example.android.persistence.R;
 
 import java.util.List;
 import java.util.Objects;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
 
-    List<? extends Product> mProductList;
+    private List<? extends Product> mProductList;
 
     @Nullable
     private final ProductClickCallback mProductClickCallback;
@@ -59,15 +59,15 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
                 @Override
                 public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                    return mProductList.get(oldItemPosition).getId() ==
-                            productList.get(newItemPosition).getId();
+                    return mProductList.get(oldItemPosition).getId().equals(
+                            productList.get(newItemPosition).getId());
                 }
 
                 @Override
                 public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
                     Product product = productList.get(newItemPosition);
                     Product old = productList.get(oldItemPosition);
-                    return product.getId() == old.getId()
+                    return product.getId().equals(old.getId())
                             && Objects.equals(product.getDescription(), old.getDescription())
                             && Objects.equals(product.getName(), old.getName())
                             && product.getPrice() == old.getPrice();
@@ -102,7 +102,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         final ProductItemBinding binding;
 
-        public ProductViewHolder(ProductItemBinding binding) {
+        ProductViewHolder(ProductItemBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

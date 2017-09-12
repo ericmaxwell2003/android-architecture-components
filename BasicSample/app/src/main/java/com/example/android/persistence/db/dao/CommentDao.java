@@ -18,23 +18,52 @@ package com.example.android.persistence.db.dao;
 
 
 import android.arch.lifecycle.LiveData;
-import android.arch.persistence.room.Dao;
-import android.arch.persistence.room.Insert;
-import android.arch.persistence.room.OnConflictStrategy;
-import android.arch.persistence.room.Query;
 
 import com.example.android.persistence.db.entity.CommentEntity;
+import com.example.android.persistence.db.util.RealmResultsLiveData;
 
 import java.util.List;
 
-@Dao
-public interface CommentDao {
-    @Query("SELECT * FROM comments where productId = :productId")
-    LiveData<List<CommentEntity>> loadComments(int productId);
+import javax.annotation.Nonnull;
 
-    @Query("SELECT * FROM comments where productId = :productId")
-    List<CommentEntity> loadCommentsSync(int productId);
+import io.realm.Realm;
+import io.realm.RealmResults;
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertAll(List<CommentEntity> products);
+public class CommentDao {
+
+    private Realm db;
+
+    public CommentDao(Realm db) {
+        this.db = db;
+    }
+
+    public LiveData<RealmResults<CommentEntity>> loadComments(String productId) {
+        return new RealmResultsLiveData<>(db
+                .where(CommentEntity.class)
+                .equalTo("product.id", productId)
+                .findAllAsync());
+    }
+//
+//    @Query("SELECT * FROM comments where productId = :productId")
+//    List<CommentEntity> loadCommentsSync(int productId);
+
+//    @Insert(onConflict = OnConflictStrategy.REPLACE)
+//    void insertAll(List<CommentEntity> products);
+
+    public void insertOrReplaceAll(final List<CommentEntity> comments) {
+
+        if(db.isInTransaction()) {
+            db.insertOrUpdate(comments);
+
+
+        } else {
+            db.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(@Nonnull Realm realm) {
+                    realm.insertOrUpdate(comments);
+                }
+            });
+        }
+    }
+
 }

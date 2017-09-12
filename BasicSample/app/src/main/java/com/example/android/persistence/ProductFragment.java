@@ -69,7 +69,7 @@ public class ProductFragment extends LifecycleFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         ProductViewModel.Factory factory = new ProductViewModel.Factory(
-                getActivity().getApplication(), getArguments().getInt(KEY_PRODUCT_ID));
+                getArguments().getString(KEY_PRODUCT_ID));
 
         final ProductViewModel model = ViewModelProviders.of(this, factory)
                 .get(ProductViewModel.class);
@@ -104,10 +104,10 @@ public class ProductFragment extends LifecycleFragment {
     }
 
     /** Creates product fragment for specific product ID */
-    public static ProductFragment forProduct(int productId) {
+    public static ProductFragment forProduct(String productId) {
         ProductFragment fragment = new ProductFragment();
         Bundle args = new Bundle();
-        args.putInt(KEY_PRODUCT_ID, productId);
+        args.putString(KEY_PRODUCT_ID, productId);
         fragment.setArguments(args);
         return fragment;
     }

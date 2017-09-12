@@ -24,7 +24,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import io.realm.Realm;
+
+import static com.example.android.persistence.db.util.RealmUtil.commentDao;
+import static com.example.android.persistence.db.util.RealmUtil.productDao;
 
 /** Generates dummy data and inserts them into the database */
 class DatabaseInitUtil {
@@ -40,7 +46,7 @@ class DatabaseInitUtil {
             "Comment 1", "Comment 2", "Comment 3", "Comment 4", "Comment 5", "Comment 6",
     };
 
-    static void initializeDb(AppDatabase db) {
+    static void initializeDb(Realm db) {
         List<ProductEntity> products = new ArrayList<>(FIRST.length * SECOND.length);
         List<CommentEntity> comments = new ArrayList<>();
 
@@ -57,16 +63,17 @@ class DatabaseInitUtil {
                 product.setName(FIRST[i] + " " + SECOND[j]);
                 product.setDescription(product.getName() + " " + DESCRIPTION[j]);
                 product.setPrice(rnd.nextInt(240));
-                product.setId(FIRST.length * i + j + 1);
+                product.setId(UUID.randomUUID().toString());
                 products.add(product);
             }
         }
 
-        for (Product product : products) {
+        for (ProductEntity product : products) {
             int commentsNumber = rnd.nextInt(5) + 1;
             for (int i = 0; i < commentsNumber; i++) {
                 CommentEntity comment = new CommentEntity();
-                comment.setProductId(product.getId());
+                comment.setId(UUID.randomUUID().toString());
+                comment.setProduct(product);
                 comment.setText(COMMENTS[i] + " for " + product.getName());
                 comment.setPostedAt(new Date(System.currentTimeMillis()
                         - TimeUnit.DAYS.toMillis(commentsNumber - i) + TimeUnit.HOURS.toMillis(i)));
@@ -75,14 +82,14 @@ class DatabaseInitUtil {
         }
     }
 
-    private static void insertData(AppDatabase db, List<ProductEntity> products, List<CommentEntity> comments) {
+    private static void insertData(Realm db, List<ProductEntity> products, List<CommentEntity> comments) {
         db.beginTransaction();
         try {
-            db.productDao().insertAll(products);
-            db.commentDao().insertAll(comments);
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
+            productDao(db).insertOrReplaceAll(products);
+            commentDao(db).insertOrReplaceAll(comments);
+            db.commitTransaction();
+        } catch (Throwable t){
+            db.cancelTransaction();
         }
     }
 }

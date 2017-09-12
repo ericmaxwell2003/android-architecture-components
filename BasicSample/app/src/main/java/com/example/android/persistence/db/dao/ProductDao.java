@@ -17,26 +17,57 @@
 package com.example.android.persistence.db.dao;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.persistence.room.Dao;
-import android.arch.persistence.room.Insert;
-import android.arch.persistence.room.OnConflictStrategy;
-import android.arch.persistence.room.Query;
 
 import com.example.android.persistence.db.entity.ProductEntity;
+import com.example.android.persistence.db.util.RealmModelLiveData;
+import com.example.android.persistence.db.util.RealmResultsLiveData;
 
 import java.util.List;
 
-@Dao
-public interface ProductDao {
-    @Query("SELECT * FROM products")
-    LiveData<List<ProductEntity>> loadAllProducts();
+import javax.annotation.Nonnull;
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertAll(List<ProductEntity> products);
+import io.realm.Realm;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
 
-    @Query("select * from products where id = :productId")
-    LiveData<ProductEntity> loadProduct(int productId);
+public class ProductDao {
 
-    @Query("select * from products where id = :productId")
-    ProductEntity loadProductSync(int productId);
+    private Realm db;
+
+    public ProductDao(Realm db) {
+        this.db = db;
+    }
+
+    public LiveData<RealmResults<ProductEntity>> loadAllProducts() {
+        return new RealmResultsLiveData<>(db.where(ProductEntity.class).findAllAsync());
+    }
+
+    public LiveData<ProductEntity> loadProduct(String productId) {
+        return new RealmModelLiveData<>(byId(productId).findFirstAsync());
+    }
+
+    public ProductEntity loadProductSync(String productId) {
+        return byId(productId).findFirst();
+    }
+
+    private RealmQuery<ProductEntity> byId(String id) {
+        return db.where(ProductEntity.class).equalTo("id", id);
+    }
+
+    public void insertOrReplaceAll(final List<ProductEntity> products) {
+
+        if(db.isInTransaction()) {
+            db.insertOrUpdate(products);
+
+
+        } else {
+            db.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(@Nonnull Realm realm) {
+                    realm.insertOrUpdate(products);
+                }
+            });
+        }
+    }
+
 }

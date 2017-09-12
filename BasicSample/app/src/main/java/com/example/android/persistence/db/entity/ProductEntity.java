@@ -16,25 +16,30 @@
 
 package com.example.android.persistence.db.entity;
 
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
-
 import com.example.android.persistence.model.Product;
 
-@Entity(tableName = "products")
-public class ProductEntity implements Product {
+import io.realm.RealmModel;
+import io.realm.annotations.PrimaryKey;
+import io.realm.annotations.RealmClass;
+import io.realm.annotations.Required;
+
+//@Entity(tableName = "products")
+@RealmClass
+public class ProductEntity implements RealmModel, Product {
+
+    @Required
     @PrimaryKey
-    private int id;
+    private String id;
     private String name;
     private String description;
     private int price;
 
     @Override
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

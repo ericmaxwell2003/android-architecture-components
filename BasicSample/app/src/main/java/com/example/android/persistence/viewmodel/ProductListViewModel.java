@@ -16,49 +16,54 @@
 
 package com.example.android.persistence.viewmodel;
 
-import android.app.Application;
-import android.arch.core.util.Function;
-import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Transformations;
+import android.arch.lifecycle.ViewModel;
 
 import com.example.android.persistence.db.DatabaseCreator;
 import com.example.android.persistence.db.entity.ProductEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class ProductListViewModel extends AndroidViewModel {
+import io.realm.Realm;
+
+import static com.example.android.persistence.db.util.RealmUtil.productDao;
+
+public class ProductListViewModel extends ViewModel {
+
+    private Realm database;
 
     private static final MutableLiveData ABSENT = new MutableLiveData();
-    {
+
+    static {
         //noinspection unchecked
         ABSENT.setValue(null);
     }
 
     private final LiveData<List<ProductEntity>> mObservableProducts;
 
-    public ProductListViewModel(Application application) {
-        super(application);
+    public ProductListViewModel() {
+        database = Realm.getDefaultInstance();
 
-        final DatabaseCreator databaseCreator = DatabaseCreator.getInstance(this.getApplication());
+        final DatabaseCreator databaseCreator = DatabaseCreator.getInstance();
 
         LiveData<Boolean> databaseCreated = databaseCreator.isDatabaseCreated();
-        mObservableProducts = Transformations.switchMap(databaseCreated,
-                new Function<Boolean, LiveData<List<ProductEntity>>>() {
-            @Override
-            public LiveData<List<ProductEntity>> apply(Boolean isDbCreated) {
-                if (!Boolean.TRUE.equals(isDbCreated)) { // Not needed here, but watch out for null
-                    //noinspection unchecked
-                    return ABSENT;
-                } else {
-                    //noinspection ConstantConditions
-                    return databaseCreator.getDatabase().productDao().loadAllProducts();
-                }
-            }
-        });
 
-        databaseCreator.createDb(this.getApplication());
+        mObservableProducts = Transformations.switchMap(databaseCreated,
+                isDbCreated -> {
+                    // Not needed here, but watch out for null
+                    if (!Boolean.TRUE.equals(isDbCreated)) {
+                        //noinspection unchecked
+                        return ABSENT;
+                    } else {
+                        return Transformations.map(
+                                productDao(database).loadAllProducts(), ArrayList::new);
+                    }
+                });
+
+        databaseCreator.createDb();
     }
 
     /**

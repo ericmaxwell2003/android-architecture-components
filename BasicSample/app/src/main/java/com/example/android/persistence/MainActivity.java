@@ -16,10 +16,10 @@
 
 package com.example.android.persistence;
 
+import android.arch.lifecycle.LifecycleActivity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
-import android.arch.lifecycle.LifecycleActivity;
 import com.example.android.persistence.model.Product;
 
 public class MainActivity extends LifecycleActivity {
