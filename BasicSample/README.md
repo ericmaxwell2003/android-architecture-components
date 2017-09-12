@@ -34,16 +34,16 @@ The app uses a Model-View-ViewModel (MVVM) architecture for the presentation lay
 * Views, including the fragments used in this sample, subscribe to corresponding `LiveData` objects. Because `LiveData` is lifecycle-aware, it doesn't push changes to the underlying data if the observer is not in an active state, and this helps to avoid many common bugs. This is an example of a subscription:
 
 ```java
-        // Update the list of products when the underlying data changes.
-        // Update the list when the data changes
-        viewModel.getProducts().observe(this, myProducts -> {
-            if (myProducts != null) {
-                mBinding.setIsLoading(false);
-                mProductAdapter.setProductList(myProducts);
-            } else {
-                mBinding.setIsLoading(true);
-            }
-        });
+    // Update the list of products when the underlying data changes.
+    // Update the list when the data changes
+    viewModel.getProducts().observe(this, myProducts -> {
+        if (myProducts != null) {
+            mBinding.setIsLoading(false);
+            mProductAdapter.setProductList(myProducts);
+        } else {
+            mBinding.setIsLoading(true);
+        }
+    });
 ```
 
 ### Data layer
@@ -55,9 +55,9 @@ Realm populates the database asynchronously on first use. The `DatabaseCreator` 
 To access the data and execute queries, you use a Data Access Object (DAO). For example, a product is loaded with the following query:
 
 ```
-        LiveData<ProductEntity> loadProduct(String productId) {
-            return new RealmModelLiveData<>(byId(productId).findFirstAsync());
-        }
+    LiveData<ProductEntity> loadProduct(String productId) {
+        return new RealmModelLiveData<>(byId(productId).findFirstAsync());
+    }
 ```
 
 Queries that return a `LiveData` object can be observed, so when a change in one of the affected tables is detected, `LiveData` delivers a notification of that change to the registered observers.
@@ -69,18 +69,17 @@ Fragments don't observe the database directly, they only interact with ViewModel
 For the purpose of the sample, the database is deleted and re-populated each time the app is started, so the app needs to wait until this process is finished. This is solved with a **Transformation**:
 
 ```java
-        mObservableProducts = Transformations.switchMap(databaseCreated,
-            isDbCreated -> {
-                // Not needed here, but watch out for null
-                if (!Boolean.TRUE.equals(isDbCreated)) {
-                    //noinspection unchecked
-                    return ABSENT;
-                } else {
-                    return Transformations.map(
-                            productDao(database).loadAllProducts(), ArrayList::new);
-                }
-            });
-
+    mObservableProducts = Transformations.switchMap(databaseCreated,
+        isDbCreated -> {
+            // Not needed here, but watch out for null
+            if (!Boolean.TRUE.equals(isDbCreated)) {
+                //noinspection unchecked
+                return ABSENT;
+            } else {
+                return Transformations.map(
+                        productDao(database).loadAllProducts(), ArrayList::new);
+            }
+        });
 ```
 
 Whenever `databaseCreated` changes, `mObservableProducts` will get a new value, either an `ABSENT` `LiveData` or the list of products. The database will be observed with the same scope as `mObservableProducts`.
