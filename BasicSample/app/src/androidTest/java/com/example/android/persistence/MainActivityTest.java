@@ -17,23 +17,19 @@
 package com.example.android.persistence;
 
 
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.support.annotation.Nullable;
 import android.support.test.espresso.Espresso;
 import android.support.test.espresso.IdlingResource;
 import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.rule.ActivityTestRule;
 import android.support.v4.app.Fragment;
 
-import com.example.android.persistence.db.entity.ProductEntity;
 import com.example.android.persistence.viewmodel.ProductListViewModel;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static android.support.test.espresso.Espresso.onView;
@@ -63,12 +59,9 @@ public class MainActivityTest {
 
         // Subscribe to ProductListViewModel's products list observable to figure out when the
         // app is idle.
-        productListViewModel.getProducts().observeForever(new Observer<List<ProductEntity>>() {
-            @Override
-            public void onChanged(@Nullable List<ProductEntity> productEntities) {
-                if (productEntities != null) {
-                    idlingRes.setIdleNow(true);
-                }
+        productListViewModel.getProducts().observeForever(productEntities -> {
+            if (productEntities != null) {
+                idlingRes.setIdleNow(true);
             }
         });
     }

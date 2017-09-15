@@ -17,7 +17,6 @@
 package com.example.android.persistence;
 
 import android.arch.lifecycle.LifecycleFragment;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -27,14 +26,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.persistence.databinding.ProductFragmentBinding;
-import com.example.android.persistence.db.entity.CommentEntity;
-import com.example.android.persistence.db.entity.ProductEntity;
-import com.example.android.persistence.model.Comment;
 import com.example.android.persistence.ui.CommentAdapter;
 import com.example.android.persistence.ui.CommentClickCallback;
 import com.example.android.persistence.viewmodel.ProductViewModel;
-
-import java.util.List;
 
 public class ProductFragment extends LifecycleFragment {
 
