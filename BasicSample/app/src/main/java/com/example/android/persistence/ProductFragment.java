@@ -73,10 +73,10 @@ public class ProductFragment extends LifecycleFragment {
         model.getObservableProduct().observe(this, model::setProduct);
 
         // Observe comments
-        model.getComments().observe(this, commentEntities -> {
-            if (commentEntities != null) {
+        model.getComments().observe(this, comment -> {
+            if (comment != null) {
                 mBinding.setIsLoading(false);
-                mCommentAdapter.setCommentList(commentEntities);
+                mCommentAdapter.setCommentList(comment);
             } else {
                 mBinding.setIsLoading(true);
             }

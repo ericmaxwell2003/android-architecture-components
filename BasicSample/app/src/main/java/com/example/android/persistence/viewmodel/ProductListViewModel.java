@@ -22,7 +22,7 @@ import android.arch.lifecycle.Transformations;
 import android.arch.lifecycle.ViewModel;
 
 import com.example.android.persistence.db.DatabaseCreator;
-import com.example.android.persistence.db.entity.ProductEntity;
+import com.example.android.persistence.model.Product;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ public class ProductListViewModel extends ViewModel {
         ABSENT.setValue(null);
     }
 
-    private final LiveData<List<ProductEntity>> mObservableProducts;
+    private final LiveData<List<? extends Product>> mObservableProducts;
 
     public ProductListViewModel() {
         database = Realm.getDefaultInstance();
@@ -69,7 +69,7 @@ public class ProductListViewModel extends ViewModel {
     /**
      * Expose the LiveData Products query so the UI can observe it.
      */
-    public LiveData<List<ProductEntity>> getProducts() {
+    public LiveData<List<? extends Product>> getProducts() {
         return mObservableProducts;
     }
 }

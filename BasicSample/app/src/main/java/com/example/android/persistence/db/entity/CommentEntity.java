@@ -17,7 +17,6 @@
 package com.example.android.persistence.db.entity;
 
 import com.example.android.persistence.model.Comment;
-import com.example.android.persistence.model.Product;
 
 import java.util.Date;
 

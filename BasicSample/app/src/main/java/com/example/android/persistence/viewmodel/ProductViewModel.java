@@ -24,8 +24,8 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.databinding.ObservableField;
 
 import com.example.android.persistence.db.DatabaseCreator;
-import com.example.android.persistence.db.entity.CommentEntity;
-import com.example.android.persistence.db.entity.ProductEntity;
+import com.example.android.persistence.model.Comment;
+import com.example.android.persistence.model.Product;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,13 +46,13 @@ public class ProductViewModel extends ViewModel {
         ABSENT.setValue(null);
     }
 
-    private final LiveData<ProductEntity> mObservableProduct;
+    private final LiveData<? extends Product> mObservableProduct;
 
-    public ObservableField<ProductEntity> product = new ObservableField<>();
+    public ObservableField<Product> product = new ObservableField<>();
 
     private final String mProductId;
 
-    private final LiveData<List<CommentEntity>> mObservableComments;
+    private final LiveData<List<? extends Comment>> mObservableComments;
 
     public ProductViewModel(final String productId) {
 
@@ -92,15 +92,15 @@ public class ProductViewModel extends ViewModel {
     /**
      * Expose the LiveData Comments query so the UI can observe it.
      */
-    public LiveData<List<CommentEntity>> getComments() {
+    public LiveData<List<? extends Comment>> getComments() {
         return mObservableComments;
     }
 
-    public LiveData<ProductEntity> getObservableProduct() {
+    public LiveData<? extends Product> getObservableProduct() {
         return mObservableProduct;
     }
 
-    public void setProduct(ProductEntity product) {
+    public void setProduct(Product product) {
         this.product.set(product);
     }
 
